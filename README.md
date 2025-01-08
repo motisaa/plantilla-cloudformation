@@ -1,2 +1,2 @@
-# plantilla-cloudformation
+# plantilla cloudformation
 plantilla CE
