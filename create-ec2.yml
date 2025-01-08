@@ -1,0 +1,10 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Creación de una instancia EC2 básica sin parámetros
+
+Resources:
+  EC2Instance:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      InstanceType: t2.micro
+      KeyName: vockey 
+      ImageId: ami-007868005aea67c54 # Amazon Linux 2 AMI en la región us-east-1
