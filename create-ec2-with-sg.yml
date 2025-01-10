@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Creación de una instancia EC2 básica sin parámetros'
+
+Resources:
+  EC2Instance:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      InstanceType: 't2.micro'
+      KeyName: 'vockey'
+      ImageId: 'ami-0e2c8caa4b6378d8c' # Amazon Linux 2 AMI en la región us-east-1
+      SecurityGroupIds:
+        - !Ref MySecurityGroup  # Referencia el grupo de seguridad
+
+  MySecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'Grupo de seguridad para EC2'
+      SecurityGroupIngress:
+        - IpProtocol: 'tcp'
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: '0.0.0.0/0'  # Permite acceso SSH desde cualquier dirección IP
+        - IpProtocol: 'tcp'
+          FromPort: '20'
+          ToPort: '20'
+          CidrIp: '0.0.0.0/0'  # Permite acceso al puerto 20 desde cualquier IP
