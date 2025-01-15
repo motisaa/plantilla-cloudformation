@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Creación de una instancia EC2 básica sin parámetros'
+Description: 'Creación de una instancia EC2 básica con acceso a Internet'
 
 Parameters:
   ImageId:
@@ -23,6 +23,19 @@ Resources:
         - Key: "Name"
           Value: "VPCofMOTI"
 
+  InternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+    Properties:
+      Tags:
+        - Key: "Name"
+          Value: "MiIGW"
+
+  GatewayAttachment:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
   PublicSubnet:
     Type: "AWS::EC2::Subnet"
     Properties:
@@ -33,6 +46,28 @@ Resources:
       Tags:
         - Key: "Name"
           Value: "MiPublicSubnet"
+
+  RouteTable:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref VPC  # Aseguramos que la RouteTable pertenece a la misma VPC
+      Tags:
+        - Key: "Name"
+          Value: "PublicRouteTable"
+
+  Route:
+    Type: "AWS::EC2::Route"
+    DependsOn: GatewayAttachment  # Aseguramos que el GatewayAttachment esté completo antes de crear la ruta
+    Properties:
+      RouteTableId: !Ref RouteTable
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref InternetGateway
+
+  SubnetRouteTableAssociation:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref RouteTable
 
   MySecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
