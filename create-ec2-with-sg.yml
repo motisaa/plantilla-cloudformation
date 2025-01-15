@@ -24,3 +24,7 @@ Resources:
           FromPort: '20'
           ToPort: '20'
           CidrIp: '0.0.0.0/0'  # Permite acceso al puerto 20 desde cualquier IP
+        - IpProtocol: 'tcp'
+          FromPort: '53'
+          ToPort: '53'
+          CidrIp: '8.8.8.8/0'  # Permite acceso al puerto 53 desde cualquier IP
