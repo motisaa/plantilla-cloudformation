@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "plantilla de ejercicio 04.01"
+
+Parameters:
+  CrearEC2:
+    Description: "Create EC2 instance"
+    Type: String
+    Default: "true"
+    AllowedValues:
+      - "true"
+      - "false"
+  InstanceType:
+    Description: "Instance type"
+    Type: String
+    Default: "t2.micro"
+    AllowedValues:
+      - "t2.micro"
+      - "t2.small"
+      - "t2.medium"
+
+Rules:
+  TypeEc2:
+    Assertions:
+      - Assert:
+          "Fn::Contains":
+            - ["t2.micro", "t2.small", "t2.medium"]
+            - !Ref InstanceType
+    Assert: "true"
+
+Conditions:
+  CrearEC2: !Equals [!Ref CrearEC2, "true"]
+
+Resources:
+
+  MyVPCMoti:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: "10.0.0.0/16"
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: "MyVPC"
+
+  MyPublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref MyVPCMoti
+      CidrBlock: "10.0.0.0/24"
+      AvailabilityZone: "us-east-1a"
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: Public-Subnet
+
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Condition: CrearEC2
+    Properties:
+      AvailabilityZone: !Select [ 0, !GetAZs "" ]
+      ImageId: "ami-04b4f1a9cf54c11d0"
+      InstanceType: !Ref InstanceType
+      KeyName: vockey
+      SubnetId: !Ref MyPublicSubnet
+      Tags:
+        - Key: Name
+          Value: !Join ["-", [!GetAtt MyPublicSubnet.AvailabilityZone, "Moti", !Ref "AWS::Region"]] 
+        - Key: VPCID
+          Value: !Ref MyVPCMoti
