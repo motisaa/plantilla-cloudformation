@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "plantilla de ejercicio 04.02.2"
+
+Parameters:
+  AttachIGW:
+    Type: String
+    Default: "true"
+    AllowedValues: ["true", "false"]
+    Description: "Determina si se adjunta un IGW. Por defecto tiene valor true"
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      VPC: 10.0.0.0/20
+      Subnet: 10.0.1.0/24
+    us-west-1:
+      VPC: 172.16.0.0/20
+      Subnet: 172.16.1.0/24
+
+Conditions:
+  CreateIGW: !Equals [!Ref AttachIGW, "true"]
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !FindInMap [RegionMap, !Ref "AWS::Region", VPC]
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Sub "VPC-${AWS::Region}"
+
+  Subnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !FindInMap [RegionMap, !Ref "AWS::Region", Subnet]
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      MapPublicIpOnLaunch: !If  [CreateIGW, true, false]
+      Tags:
+        - Key: Name
+          Value: !Sub "Subnet-${AWS::Region}"
+
+  InternetGetWayDeMoti:
+    Type: AWS::EC2::InternetGateway
+    Condition: CreateIGW
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub "IGW-${AWS::Region}"
+
+  VPCGatewayattachmentDeMoti:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Condition: CreateIGW
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGetWayDeMoti
